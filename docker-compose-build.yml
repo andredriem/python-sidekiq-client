@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  sidekiq-client-build:
+    build: .
+    volumes:
+      - .:/app  # Mount current directory into container
+      - ./dist:/app/dist  # Ensure built artifacts are persisted locally
+    working_dir: /app
+    command: >
+      sh -c "
+      pip install --upgrade build &&
+      python -m build
+      "
+

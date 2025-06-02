@@ -1,0 +1,30 @@
+version: "3.8"
+networks:
+  redis_network:
+    name: redis_network
+services:
+  sidekiq-client-test:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sh -c "i=0; \
+      while ! nc -z redis 6379; do \
+      if [ $i -ge 30 ]; then \
+        echo 'Timed out waiting for Redis'; \
+        exit 1; \
+      fi; \
+      echo 'Waiting for Redis...'; \
+      sleep 1; \
+      i=$((i + 1)); \
+      done; \
+      pip install --upgrade pytest; \
+      pip install -e .; \
+      pytest"
+    networks:
+      - redis_network
+  redis:
+    image: 'redis:7.2-alpine'
+    command: redis-server
+    networks:
+      - redis_network
