@@ -7,7 +7,7 @@ scheduling and execution using Redis.
 import time
 import json
 import secrets
-from typing import Awaitable, Union, Any, List, Dict
+from typing import Union, Any, List, Dict
 from redis import Redis
 
 
@@ -31,7 +31,7 @@ class SidekiqClient:
 
     def perform_async(
         self, queue: str, job_class: str, args: List[Any], **options: Any
-    ) -> int | Awaitable[int]:
+    ) -> str:
         """Enqueue a job for immediate asynchronous processing.
 
         Args:
@@ -41,7 +41,8 @@ class SidekiqClient:
             **options: Additional options to include in the job payload.
         """
         job = self._build_job_payload(queue, job_class, args, options)
-        return self.redis.lpush(f"queue:{queue}", json.dumps(job))
+        self.redis.lpush(f"queue:{queue}", json.dumps(job))
+        return job["jid"]
 
     def perform_in(
         self,
@@ -50,7 +51,7 @@ class SidekiqClient:
         job_class: str,
         args: List[Any],
         **options: Any,
-    ) -> None:
+    ) -> str:
         """Schedule a job to run after a certain delay.
 
         Args:
@@ -61,7 +62,7 @@ class SidekiqClient:
             **options: Additional options to include in the job payload.
         """
         timestamp = time.time() + seconds_from_now
-        self._zadd_scheduled(queue, job_class, args, timestamp, options)
+        return self._zadd_scheduled(queue, job_class, args, timestamp, options)
 
     def perform_at(
         self,
@@ -70,7 +71,7 @@ class SidekiqClient:
         job_class: str,
         args: List[Any],
         **options: Any,
-    ) -> None:
+    ) -> str:
         """Schedule a job to run at a specific Unix timestamp.
 
         Args:
@@ -80,7 +81,7 @@ class SidekiqClient:
             unix_timestamp: Unix timestamp when the job should run.
             **options: Additional options to include in the job payload.
         """
-        self._zadd_scheduled(queue, job_class, args, unix_timestamp, options)
+        return self._zadd_scheduled(queue, job_class, args, unix_timestamp, options)
 
     def _zadd_scheduled(
         self,
@@ -89,7 +90,7 @@ class SidekiqClient:
         args: List[Any],
         timestamp: float,
         options: Dict[str, Any],
-    ) -> None:
+    ) -> str:
         """Add a scheduled job to the Redis sorted set.
 
         Args:
@@ -102,6 +103,7 @@ class SidekiqClient:
         job = self._build_job_payload(queue, job_class, args, options,
                                       enqueued_at=False)
         self.redis.zadd("schedule", {json.dumps(job): timestamp})
+        return job["jid"]
 
     def _build_job_payload(
         self,
