@@ -1,3 +1,32 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-sidekiq-client"
+version = "0.1.0"
+description = "Sidekiq-compatible Redis client for dispatching background jobs from Python"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "GPL-2.0-only"}
+authors = [
+    {name = "André Driemeyer" }
+]
+keywords = ["sidekiq", "redis", "background-jobs", "async", "ruby", "rails"]
+dependencies = [
+    "redis>=4.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/andredriem/python-sidekiq-client"
+Repository = "https://github.com/andredriem/python-sidekiq-client"
+Issues = "https://github.com/andredriem/python-sidekiq-client/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+    "ruff",
+    "build",
+    "twine"
+]
