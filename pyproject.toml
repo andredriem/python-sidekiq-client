@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-sidekiq-client"
-version = "0.1.0"
+version = "0.9.2"
 description = "Sidekiq-compatible Redis client for dispatching background jobs from Python"
 readme = "README.md"
 requires-python = ">=3.7"
